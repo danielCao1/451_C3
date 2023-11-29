@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Important Credentials ###
+src/main/resources/application.yml

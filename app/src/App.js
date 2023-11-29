@@ -20,9 +20,17 @@ const UserProfiles = () => {
       <div key={index}>
         <br />
         <br />
+
         <h1>{userProfile.username}</h1>
         <p>{userProfile.userProfileId}</p>
         <Dropzone {...userProfile} />
+        {userProfile.userProfileId ? (
+          <a
+            href={`http://localhost:8080/api/v1/user-profile/${userProfile.userProfileId}/binary/download`}
+          >
+            Download File
+          </a>
+        ) : null}
         <br />
       </div>
     );

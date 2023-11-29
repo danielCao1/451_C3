@@ -1,7 +1,11 @@
 package com.c1.enhancedghidra.filestore;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.amazonaws.util.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -22,13 +26,23 @@ public class FileStore {
         this.s3 = s3;
     }
 
-    public void save(String path, MultipartFile file) {
+    public void uploadFile(String key, MultipartFile file) {
         File fileObj = convertMultiPartFileToFile(file);
         try {
-            s3.putObject(new PutObjectRequest(bucketName, path, fileObj));
+            s3.putObject(new PutObjectRequest(bucketName, key, fileObj));
         } finally {
-            // TODO: Before deleteing process file with ghidra
             fileObj.delete();
+        }
+    }
+
+    public byte[] downloadFile(String key) {
+        S3Object s3Object = s3.getObject(bucketName, key);
+        S3ObjectInputStream inputStream = s3Object.getObjectContent();
+        try {
+            byte[] content = IOUtils.toByteArray(inputStream);
+            return content;
+        } catch (AmazonServiceException | IOException error) {
+            throw new IllegalStateException("Failed to download file from s3", error);
         }
     }
 
@@ -42,6 +56,7 @@ public class FileStore {
         }
         return convertedFile;
     }
+
 
 
 }

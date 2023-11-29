@@ -1,28 +1,45 @@
 package com.c1.enhancedghidra.profile;
 
+import com.c1.enhancedghidra.filestore.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class UserProfileService {
 
     private final UserProfileDataAccessService userProfileDataAccessService;
+    private final FileStore fileStore;
 
     @Autowired
-    public UserProfileService(UserProfileDataAccessService userProfileDataAccessService) {
+    public UserProfileService(UserProfileDataAccessService userProfileDataAccessService,
+                              FileStore filestore) {
         this.userProfileDataAccessService = userProfileDataAccessService;
+        this.fileStore = filestore;
     }
     List<UserProfile> getUserProfiles() {
         return userProfileDataAccessService.getUserProfiles();
     }
 
     public void uploadUserBinaryFile(UUID userProfileId, MultipartFile file) {
-        // 1. The check user exist in our database
-        // 2. Grab some metadata from file if any
-        // 3. Store the image in s3 and update database (binaryFileLink) with s3 image link
+        if (file.isEmpty()) {
+            throw new IllegalStateException("Cannot upload empty file [" + file.getSize() + "]");
+        }
+
+        UserProfile user = userProfileDataAccessService
+                .getUserProfiles()
+                .stream()
+                .filter(userProfile -> userProfile.getUserProfileId().equals(userProfileId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(String.format("User Profile %s not found", userProfileId)));
+
+        String filename = String.format("%s-%s", file.getOriginalFilename(), UUID.randomUUID());
+        String path = String.format("%s/binaryFile/%s", user.getUserProfileId(), filename);
+
+        fileStore.save(path, file);
+
+
     }
 }

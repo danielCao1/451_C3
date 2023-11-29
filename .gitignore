@@ -34,3 +34,4 @@ build/
 
 ### Important Credentials ###
 src/main/resources/application.yml
+src/main/ghidra_10.4_PUBLIC/

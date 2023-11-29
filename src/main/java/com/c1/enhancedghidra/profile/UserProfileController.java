@@ -1,6 +1,6 @@
 package com.c1.enhancedghidra.profile;
 
-import com.c1.enhancedghidra.FileDownloadResponse;
+import com.c1.enhancedghidra.filestore.FileDownloadResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;

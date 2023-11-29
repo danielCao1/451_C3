@@ -1,4 +1,4 @@
-package com.c1.enhancedghidra;
+package com.c1.enhancedghidra.filestore;
 
 public class FileDownloadResponse {
     private final byte[] fileData;

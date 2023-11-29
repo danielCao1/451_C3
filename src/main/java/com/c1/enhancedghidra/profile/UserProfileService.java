@@ -1,6 +1,6 @@
 package com.c1.enhancedghidra.profile;
 
-import com.c1.enhancedghidra.FileDownloadResponse;
+import com.c1.enhancedghidra.filestore.FileDownloadResponse;
 import com.c1.enhancedghidra.filestore.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,7 +52,7 @@ public class UserProfileService {
                 originalFilename,
                 UUID.randomUUID().toString(),
                 extension);
-        
+
         String key = String.format("%s/binaryFile/%s", user.getUserProfileId(), filename);
 
         fileStore.uploadFile(key, file);

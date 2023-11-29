@@ -8,6 +8,7 @@ const UserProfiles = () => {
   const fetchUserProfiles = () => {
     axios.get("http://localhost:8080/api/v1/user-profile").then((res) => {
       setUserProfiles(res.data);
+      console.log(res.data[0]);
     });
   };
 
@@ -15,33 +16,26 @@ const UserProfiles = () => {
     fetchUserProfiles();
   }, []);
 
-  return userProfiles.map((userProfile, index) => {
-    return (
-      <div key={index}>
-        <br />
-        <br />
-
-        <h1>{userProfile.username}</h1>
-        <p>{userProfile.userProfileId}</p>
-        <Dropzone {...userProfile} />
-        {userProfile.userProfileId ? (
-          <a
-            href={`http://localhost:8080/api/v1/user-profile/${userProfile.userProfileId}/binary/download`}
-          >
-            Download File
-          </a>
-        ) : null}
-        <br />
-      </div>
-    );
-  });
+  return (
+    <div>
+      <h1>Test User</h1>
+      <p>{userProfiles[0]?.userProfileId}</p>
+      <Dropzone {...userProfiles[0]} />
+      {userProfiles[0]?.userProfileId ? (
+        <a
+          href={`http://localhost:8080/api/v1/user-profile/${userProfiles[0]?.userProfileId}/binary/download`}
+        >
+          Download File
+        </a>
+      ) : null}
+    </div>
+  );
 };
 
 function App() {
   return (
     <div className="App">
       <UserProfiles />
-      <p>C3 App</p>
     </div>
   );
 }

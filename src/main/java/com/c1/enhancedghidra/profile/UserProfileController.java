@@ -1,6 +1,7 @@
 package com.c1.enhancedghidra.profile;
 
 import com.c1.enhancedghidra.filestore.FileDownloadResponse;
+import com.c1.enhancedghidra.ghidra.GhidraService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
@@ -16,9 +17,11 @@ import java.util.UUID;
 @CrossOrigin("*")
 public class UserProfileController {
     private final UserProfileService userProfileService;
+    private final GhidraService ghidraService;
     @Autowired
-    public UserProfileController(UserProfileService userProfileService) {
+    public UserProfileController(UserProfileService userProfileService, GhidraService ghidraService) {
         this.userProfileService = userProfileService;
+        this.ghidraService = ghidraService;
     }
 
     @GetMapping
@@ -48,6 +51,14 @@ public class UserProfileController {
                 .header("Content-disposition", "attachment; filename=\"" + downloadResponse.getFileName() + "\"")
                 .body(resource);
     }
+
+    @GetMapping("{userProfileId}/execute/ghidra")
+    public String ghidraScriptOutput(@PathVariable("userProfileId") UUID userProfileId) {
+        String ghidraOutput = ghidraService.processFile(userProfileId);
+        return ghidraOutput;
+    }
+
+
 
 
 

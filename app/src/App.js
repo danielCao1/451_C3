@@ -5,11 +5,24 @@ import { useDropzone } from "react-dropzone";
 
 const UserProfiles = () => {
   const [userProfiles, setUserProfiles] = useState([]);
+  const [ghidraOutput, setGhidraOutput] = useState("");
+
   const fetchUserProfiles = () => {
     axios.get("http://localhost:8080/api/v1/user-profile").then((res) => {
       setUserProfiles(res.data);
       console.log(res.data[0]);
     });
+  };
+
+  const executeGhidraScript = async (userProfileId) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/v1/user-profile/${userProfileId}/execute/ghidra`
+      );
+      setGhidraOutput(response.data);
+    } catch (error) {
+      console.error("Error executing Ghidra script:", error);
+    }
   };
 
   useEffect(() => {
@@ -22,12 +35,24 @@ const UserProfiles = () => {
       <p>{userProfiles[0]?.userProfileId}</p>
       <Dropzone {...userProfiles[0]} />
       {userProfiles[0]?.userProfileId ? (
-        <a
-          href={`http://localhost:8080/api/v1/user-profile/${userProfiles[0]?.userProfileId}/binary/download`}
-        >
-          Download File
-        </a>
+        <div>
+          <a
+            href={`http://localhost:8080/api/v1/user-profile/${userProfiles[0]?.userProfileId}/binary/download`}
+          >
+            Download File
+          </a>
+          <button
+            onClick={() => executeGhidraScript(userProfiles[0]?.userProfileId)}
+          >
+            Run Ghidra Script
+          </button>
+        </div>
       ) : null}
+      {ghidraOutput && (
+        <div>
+          <strong>Output:</strong> {ghidraOutput}
+        </div>
+      )}
     </div>
   );
 };

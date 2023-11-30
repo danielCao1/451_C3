@@ -14,3 +14,83 @@
 }
 
 
+body { font-family: Arial, sans-serif; line-height: 1.6; }
+
+ header {
+        background-color: #f8f9fa;
+        padding: 20px;
+        text-align: center;
+    }
+
+    nav ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    nav ul li {
+        display: inline;
+        margin-right: 10px;
+    }
+
+    nav ul li a {
+        text-decoration: none;
+        color: #000;
+    }
+
+    main {
+        padding: 20px;
+    }
+
+    h2 {
+        color: #f8f9fa;
+        background-color: #007bff;
+        padding: 10px;
+        margin-bottom: 20px;
+    }
+
+    h3 {
+        color: #f8f9fa;
+        background-color: #6c757d;
+        padding: 10px;
+        margin-bottom: 20px;
+    }
+
+    p {
+        margin-bottom: 20px;
+    }
+
+
+    .upload-container {
+      text-align: center;
+    }
+    
+    /* Add styles for the file input label */
+    .file-input-label {
+      display: inline-block;
+      padding: 20px;
+      background-color: #3498db; /* Set a background color for the button */
+      border: 2px solid #2980b9; /* Set a border color for the button */
+      color: #fff; /* White text color for the button */
+      cursor: pointer;
+      font-size: 18px; /* Set the font size */
+      border-radius: 5px; /* Add some border-radius for rounded corners */
+    }
+    
+    .file-input-label input {
+      display: none;
+    }
+
+    .styled-button {
+      background-color: #3498db; /* Blue background color */
+      color: #fff; /* White text color */
+      padding: 20px; /* Padding around the text */
+      font-size: 18px; /* Font size */
+      border: none; /* Remove border */
+      border-radius: 5px; /* Add some border-radius for rounded corners */
+      cursor: pointer; /* Add a pointer cursor on hover */
+      transition: background-color 0.3s ease; /* Smooth transition for background color */
+    }
+    
+    .styled-button:hover {
+      background-color: #2980b9; /* Darker blue on hover */
+    }

@@ -164,9 +164,71 @@ const UserProfiles = () => {
 };
 
 function App() {
+  const [outputText, setOutputText] = useState("AWS link will appear here.");
+
+  const handleFileUpload = (event) => {
+    const selectedFile = event.target.files[0];
+
+    if (selectedFile) {
+      // Do something with the selected file, such as upload it to a server
+      console.log("Selected File:", selectedFile);
+
+      const processedValue = `Processed: `;
+
+      // Update the output text
+      setOutputText(processedValue);
+    }
+  };
+
   return (
     <div className="App">
-      <UserProfiles />
+      <header>
+        <h1>Source Code Reversing Tools</h1>
+      </header>
+
+      <nav>
+        <ul>
+          <li>
+            <a href="#">Home</a>
+          </li>
+          <li>
+            <a href="#">Tools</a>
+          </li>
+          <li>
+            <a href="#">About</a>
+          </li>
+          <li>
+            <a href="#">Contact</a>
+          </li>
+        </ul>
+      </nav>
+
+      <main>
+        <h2>Tool 1: Upload File to AWS S3 Bucket</h2>
+        <p>
+          This tool uploads your file to custom AWS service for security and
+          cloud access.
+        </p>
+
+        <div className="upload-container">
+          <label className="file-input-label">
+            Upload File Soure Executable
+            <input type="file" onChange={handleFileUpload} />
+          </label>
+          <p></p>
+          <div id="app">
+            <p id="outputText">{outputText}</p>
+          </div>
+        </div>
+
+        <h2>Tool 2: Vulnerability Scan</h2>
+        <p>
+          The purpose of this tool is to provide information to users on where
+          there could be potential vulnerabilities.
+        </p>
+
+        <button class="styled-button">Begin Vulnerability Scan</button>
+      </main>
     </div>
   );
 }

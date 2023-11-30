@@ -33,9 +33,8 @@ public class FunctionReferences extends GhidraScript {
                 }
             }
 
-            if (!calls.isEmpty()) {
-                functionCalls.put(function.getName(), calls);
-            }
+            functionCalls.put(function.getName(), calls);
+}
         }
 
         Gson gson = new Gson();

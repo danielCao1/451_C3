@@ -96,7 +96,6 @@ const UserProfiles = () => {
 
   return (
     <div>
-      <h1>Test User</h1>
       <Dropzone {...userProfiles[0]} />
       {userProfiles[0]?.userProfileId ? (
         <div
@@ -130,6 +129,7 @@ const UserProfiles = () => {
               maxWidth: "200px",
               margin: "10px",
             }}
+            class="styled-button"
             onClick={() => {
               setGhidraScript("DetectVulnerabilites");
               executeGhidraScript(
@@ -138,7 +138,7 @@ const UserProfiles = () => {
               );
             }}
           >
-            Run DetectVulnerabilites Script
+            Begin Vulnerability Scan
           </button>
         </div>
       ) : null}
@@ -151,10 +151,10 @@ const UserProfiles = () => {
           <strong>DetectVulnerabilites Output:</strong>
           <ul>
             {ghidraOutput.map((item, index) => (
-              <li key={index}>
+              <div key={index}>
                 Caller: {item.caller}, Vulnerable Function:{" "}
                 {item.vulnerable_function}
-              </li>
+              </div>
             ))}
           </ul>
         </div>
@@ -164,22 +164,6 @@ const UserProfiles = () => {
 };
 
 function App() {
-  const [outputText, setOutputText] = useState("AWS link will appear here.");
-
-  const handleFileUpload = (event) => {
-    const selectedFile = event.target.files[0];
-
-    if (selectedFile) {
-      // Do something with the selected file, such as upload it to a server
-      console.log("Selected File:", selectedFile);
-
-      const processedValue = `Processed: `;
-
-      // Update the output text
-      setOutputText(processedValue);
-    }
-  };
-
   return (
     <div className="App">
       <header>
@@ -204,30 +188,8 @@ function App() {
       </nav>
 
       <main>
-        <h2>Tool 1: Upload File to AWS S3 Bucket</h2>
-        <p>
-          This tool uploads your file to custom AWS service for security and
-          cloud access.
-        </p>
-
-        <div className="upload-container">
-          <label className="file-input-label">
-            Upload File Soure Executable
-            <input type="file" onChange={handleFileUpload} />
-          </label>
-          <p></p>
-          <div id="app">
-            <p id="outputText">{outputText}</p>
-          </div>
-        </div>
-
         <h2>Tool 2: Vulnerability Scan</h2>
-        <p>
-          The purpose of this tool is to provide information to users on where
-          there could be potential vulnerabilities.
-        </p>
-
-        <button class="styled-button">Begin Vulnerability Scan</button>
+        <UserProfiles />
       </main>
     </div>
   );

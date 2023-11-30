@@ -25,7 +25,6 @@ public class GhidraService {
     public Object processFile(UUID userProfileId, String scriptName) {
         FileDownloadResponse downloadResponse = userProfileService.downloadUserBinaryFile(userProfileId);
 
-        // send file to server temp file system i.e. (C:\Users\lejas\AppData\Local\Temp\)
         File tempFile = new File(System.getProperty("java.io.tmpdir"), downloadResponse.getFileName());
 
         try (FileOutputStream fos = new FileOutputStream(tempFile)) {
@@ -35,18 +34,23 @@ public class GhidraService {
         }
 
 
-        // TODO: run ghidra script
         Object scriptOutput = runGhidraScript(tempFile, scriptName);
 
         tempFile.delete();
 
-        // TODO: Return Ghidra Script Result
         return scriptOutput;
     }
 
-    // TODO: Rename this to function and also this script
-    // .\analyzeHeadless 'C:\Users\lejas\Desktop' myProject -import 'C:\Users\lejas\Desktop\repo\451_C3\src\main\ghidra_scripts\sampleBinary\b.out' -scriptPath 'C:\Users\lejas\Desktop\repo\451_C3\src\main\ghidra_scripts' -postScript DetectVulnerabilites.py
     private Object runGhidraScript(File file, String scriptName) {
+        if (Objects.equals(scriptName, "DetectVulnerabilites")) {
+            return DetectVulnerabilitesScript(file);
+        }
+
+        return null;
+    }
+
+    private List<Map<String, String>> DetectVulnerabilitesScript (File file) {
+        // Create Project Folder
         Path tempDirPath = Paths.get(System.getProperty("java.io.tmpdir"));
         String projectName = UUID.randomUUID().toString();
         Path projectDir = null;
@@ -56,6 +60,7 @@ public class GhidraService {
             throw new RuntimeException(e);
         }
 
+        // Run Headless Analyzer
         ProcessBuilder processBuilder = new ProcessBuilder(
                 "bash", "-c",
                 "\"/mnt/c/Users/lejas/Desktop/repo/451_C3/src/main/ghidra_10.4_PUBLIC/support/analyzeHeadless " +
@@ -65,12 +70,9 @@ public class GhidraService {
                         "/mnt/c/Users/lejas/Desktop/repo/451_C3/src/main/ghidra_scripts -postScript " +
                         "DetectVulnerabilites.py" + "\""
         );
-
-
-
-
         processBuilder.redirectErrorStream(true);
 
+        // Extract Output from Headless Analyzer Results
         List<Map<String, String>> outputList = new ArrayList<>();
         try {
             Process process = processBuilder.start();
@@ -78,14 +80,18 @@ public class GhidraService {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     System.out.println(line);
-                     Map<String, String> parsedLine = parseLine(line); // Implement parseLine to convert the line to a Map
-                     outputList.add(parsedLine);
+                    if (!line.startsWith("{'caller': ")) {
+                        continue;
+                    }
+                    Map<String, String> parsedLine = parseLine(line); // Implement parseLine to convert the line to a Map
+                    outputList.add(parsedLine);
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+        // Clean up Project Folder
         try {
             Files.walk(projectDir)
                     .sorted(Comparator.reverseOrder())
@@ -94,7 +100,6 @@ public class GhidraService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
 
         return outputList;
     }

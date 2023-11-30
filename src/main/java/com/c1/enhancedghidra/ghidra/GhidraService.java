@@ -11,6 +11,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+
 @Service
 public class GhidraService {
     private final UserProfileService userProfileService;
@@ -75,9 +78,8 @@ public class GhidraService {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     System.out.println(line);
-                    // Parse each line (assuming JSON output)
-                    // Map<String, String> parsedLine = parseLine(line); // Implement parseLine to convert the line to a Map
-                    // outputList.add(parsedLine);
+                     Map<String, String> parsedLine = parseLine(line); // Implement parseLine to convert the line to a Map
+                     outputList.add(parsedLine);
                 }
             }
         } catch (IOException e) {
@@ -95,6 +97,18 @@ public class GhidraService {
 
 
         return outputList;
+    }
+
+    private Map<String, String> parseLine(String line) {
+        Gson gson = new Gson();
+        try {
+            // Convert to valid JSON by replacing single quotes with double quotes and removing 'u' prefix
+            String jsonLine = line.replace("'", "\"").replace("u\"", "\"");
+            return gson.fromJson(jsonLine, Map.class);
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            return null; // or handle the error as appropriate
+        }
     }
 
 

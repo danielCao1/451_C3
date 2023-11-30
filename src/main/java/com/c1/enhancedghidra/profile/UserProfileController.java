@@ -53,10 +53,12 @@ public class UserProfileController {
     }
 
     @GetMapping("{userProfileId}/execute/ghidra")
-    public String ghidraScriptOutput(@PathVariable("userProfileId") UUID userProfileId) {
-        String ghidraOutput = ghidraService.processFile(userProfileId);
-        return ghidraOutput;
+    public ResponseEntity<?> ghidraScriptOutput(@PathVariable("userProfileId") UUID userProfileId,
+                                                @RequestParam("scriptName") String scriptName) {
+        Object ghidraOutput = ghidraService.processFile(userProfileId, scriptName);
+        return ResponseEntity.ok(ghidraOutput);
     }
+
 
 
 

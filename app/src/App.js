@@ -14,11 +14,13 @@ const UserProfiles = () => {
     });
   };
 
-  const executeGhidraScript = async (userProfileId) => {
+  const executeGhidraScript = async (userProfileId, scriptName) => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/v1/user-profile/${userProfileId}/execute/ghidra`
+        `http://localhost:8080/api/v1/user-profile/${userProfileId}/execute/ghidra`,
+        { params: { scriptName: scriptName } }
       );
+      console.log("ghidra output", response.data);
       setGhidraOutput(response.data);
     } catch (error) {
       console.error("Error executing Ghidra script:", error);
@@ -42,7 +44,12 @@ const UserProfiles = () => {
             Download File
           </a>
           <button
-            onClick={() => executeGhidraScript(userProfiles[0]?.userProfileId)}
+            onClick={() =>
+              executeGhidraScript(
+                userProfiles[0]?.userProfileId,
+                "DetectVulnerabilites"
+              )
+            }
           >
             Run Ghidra Script
           </button>

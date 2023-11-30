@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -18,7 +20,7 @@ public class GhidraService {
         this.userProfileService = userProfileService;
     }
 
-    public String processFile(UUID userProfileId) {
+    public Object processFile(UUID userProfileId, String scriptName) {
         FileDownloadResponse downloadResponse = userProfileService.downloadUserBinaryFile(userProfileId);
 
         // send file to server temp file system i.e. (C:\Users\lejas\AppData\Local\Temp\)
@@ -33,22 +35,24 @@ public class GhidraService {
 
 
         // TODO: run ghidra script
+        Object scriptOutput = runGhidraScript(tempFile, scriptName);
 
-        // tempFile.delete();
+        tempFile.delete();
 
         // TODO: Return Ghidra Script Result
-        return "Howdy";
+        return scriptOutput;
     }
 
-    // TODO: Rename this to function and also this scirpt
-    // .\analyzeHeadless 'C:\Users\lejas\Desktop' myProject
-    // -import 'C:\Users\lejas\Desktop\q1'
-    // -scriptPath 'C:\Users\lejas\Desktop\repo\451_C3\src\main\java\ghidra_scripts'
-    // -postScript DecompileHeadless.java
-    private void runGhidraScript(File file) {
-        // Implement the logic to run Ghidra script or other processing here
-        // Example:
-        // ProcessBuilder pb = new ProcessBuilder("/path/to/ghidra/script", file.getAbsolutePath());
-        // Process p = pb.start();
+    // TODO: Rename this to function and also this script
+    // .\analyzeHeadless 'C:\Users\lejas\Desktop' myProject -import 'C:\Users\lejas\Desktop\repo\451_C3\src\main\ghidra_scripts\sampleBinary\b.out' -scriptPath 'C:\Users\lejas\Desktop\repo\451_C3\src\main\ghidra_scripts' -postScript DetectVulnerabilites.py
+    private Object runGhidraScript(File file, String scriptName) {
+        System.out.println(scriptName + "test");
+
+        List<String> outputList = new ArrayList<>();
+        outputList.add("test");
+        outputList.add("output");
+
+        return outputList;
     }
+
 }

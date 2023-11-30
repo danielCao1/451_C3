@@ -17,6 +17,7 @@
 
 import java.io.File;
 import java.util.*;
+import java.io.PrintWriter;
 
 import ghidra.app.script.GatherParamPanel;
 import ghidra.app.script.GhidraScript;
@@ -29,34 +30,29 @@ import ghidra.app.decompiler.DecompInterface;
 import ghidra.app.decompiler.DecompileResults;
 
 public class DecompileHeadless extends GhidraScript {
-
 	@Override
 	public void run() throws Exception {
 		FunctionIterator functions = currentProgram.getFunctionManager().getFunctions(true);
-		Map<String, String> functionsCodeMap = new HashMap<>();
-
 		DecompInterface decompiler = setUpDecompiler(currentProgram);
 
 		for (Function function : functions) {
 			DecompileResults results = decompiler.decompileFunction(function, 0, monitor);
 			if (results.decompileCompleted()) {
-				String decompiledFunction = results.getDecompiledFunction().getC();
-				functionsCodeMap.put(function.getName(), decompiledFunction);
-			}
-		}
+				File tempFile = File.createTempFile("decompFunc-", null);
+				try (PrintWriter writer = new PrintWriter(tempFile)) {
+					writer.println(results.getDecompiledFunction().getC());
+				}
 
-		for (Map.Entry<String, String> entry : functionsCodeMap.entrySet()) {
-			String functionName = entry.getKey();
-			String functionCode = entry.getValue();
+				System.out.println("(start) functionName: " + function.getName());
+				try (Scanner scanner = new Scanner(tempFile)) {
+					while (scanner.hasNextLine()) {
+						System.out.println(scanner.nextLine().replace("\"", "\\\""));  // Escape double quotes
+					}
+				}
+				System.out.println("(end) functionName: " + function.getName());
 
-			println("Function Name: " + functionName);
-			println("Decompiled Code:");
-			Scanner scanner = new Scanner(functionCode);
-			while (scanner.hasNextLine()) {
-				println(scanner.nextLine());
+				tempFile.delete();
 			}
-			scanner.close();
-			println(); // Add an extra newline for readability between functions
 		}
 	}
 

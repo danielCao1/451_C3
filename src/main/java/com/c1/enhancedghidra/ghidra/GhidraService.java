@@ -44,9 +44,84 @@ public class GhidraService {
     private Object runGhidraScript(File file, String scriptName) {
         if (Objects.equals(scriptName, "DetectVulnerabilites")) {
             return DetectVulnerabilitesScript(file);
+        } else if (Objects.equals(scriptName, "DecompileHeadless")) {
+            return DecompileHeadlessScript(file);
         }
 
         return null;
+    }
+
+    private List<Map<String, String>> DecompileHeadlessScript(File file) {
+        Path tempDirPath = Paths.get(System.getProperty("java.io.tmpdir"));
+        String projectName = UUID.randomUUID().toString();
+        Path projectDir = null;
+        try {
+            projectDir = Files.createTempDirectory(tempDirPath, projectName);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Run Headless Analyzer
+        ProcessBuilder processBuilder = new ProcessBuilder(
+                "bash", "-c",
+                "\"/mnt/c/Users/lejas/Desktop/repo/451_C3/src/main/ghidra_10.4_PUBLIC/support/analyzeHeadless " +
+                        projectDir.toString().replace("\\", "/").replace("C:/", "/mnt/c/") + " " +
+                        projectName + " -import " +
+                        file.getAbsolutePath().replace("\\", "/").replace("C:/", "/mnt/c/") + " -scriptPath " +
+                        "/mnt/c/Users/lejas/Desktop/repo/451_C3/src/main/ghidra_scripts -postScript " +
+                        "DecompileHeadless" + "\""
+        );
+        processBuilder.redirectErrorStream(true);
+
+        // Extract Output from Headless Analyzer Results
+        List<Map<String, String>> outputList = new ArrayList<>();
+        StringBuilder functionCode = new StringBuilder();
+        String currentFunctionName = null;
+        boolean isInsideFunction = false;
+
+        try {
+            Process process = processBuilder.start();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    System.out.println(line);
+
+                    if (line.startsWith("INFO")) {
+                        continue;
+                    }
+
+                    if (line.startsWith("(start) functionName: ")) {
+                        isInsideFunction = true;
+                        currentFunctionName = line.substring("(start) functionName: ".length());
+                        functionCode = new StringBuilder();
+                    } else if (line.startsWith("(end) functionName: ")) {
+                        isInsideFunction = false;
+                        if (currentFunctionName != null) {
+                            Map<String, String> functionMap = new HashMap<>();
+                            functionMap.put(currentFunctionName, functionCode.toString());
+                            outputList.add(functionMap);
+                        }
+                    } else if (isInsideFunction) {
+                        functionCode.append(line).append("\n");
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        // Clean up Project Folder
+        try {
+            Files.walk(projectDir)
+                    .sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return outputList;
     }
 
     private List<Map<String, String>> DetectVulnerabilitesScript (File file) {
@@ -83,7 +158,7 @@ public class GhidraService {
                     if (!line.startsWith("{'caller': ")) {
                         continue;
                     }
-                    Map<String, String> parsedLine = parseLine(line); // Implement parseLine to convert the line to a Map
+                    Map<String, String> parsedLine = parseLineDetectVul(line); // Implement parseLine to convert the line to a Map
                     outputList.add(parsedLine);
                 }
             }
@@ -104,7 +179,7 @@ public class GhidraService {
         return outputList;
     }
 
-    private Map<String, String> parseLine(String line) {
+    private Map<String, String> parseLineDetectVul(String line) {
         Gson gson = new Gson();
         try {
             // Convert to valid JSON by replacing single quotes with double quotes and removing 'u' prefix

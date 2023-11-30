@@ -140,6 +140,23 @@ const UserProfiles = () => {
           >
             Begin Vulnerability Scan
           </button>
+
+          <button
+            style={{
+              maxWidth: "200px",
+              margin: "10px",
+            }}
+            class="styled-button"
+            onClick={() => {
+              setGhidraScript("DecompileHeadless");
+              executeGhidraScript(
+                userProfiles[0]?.userProfileId,
+                "DecompileHeadless"
+              );
+            }}
+          >
+            Begin All Function Output
+          </button>
         </div>
       ) : null}
 
@@ -156,6 +173,24 @@ const UserProfiles = () => {
                 {item.vulnerable_function}
               </div>
             ))}
+          </ul>
+        </div>
+      )}
+
+      {ghidraOutput && ghidraScript === "DecompileHeadless" && (
+        <div style={{ textAlign: "left" }}>
+          <strong>DecompileHeadless Output:</strong>
+          <ul>
+            {ghidraOutput.map((item, index) => {
+              const functionName = Object.keys(item)[0];
+              const functionCode = item[functionName];
+              return (
+                <li key={index}>
+                  <strong>{functionName}</strong>
+                  <pre>{functionCode}</pre>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}

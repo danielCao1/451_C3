@@ -43,7 +43,7 @@ public class GhidraService {
     // TODO: Rename this to function and also this scirpt
     // .\analyzeHeadless 'C:\Users\lejas\Desktop' myProject
     // -import 'C:\Users\lejas\Desktop\q1'
-    // -scriptPath 'C:\Users\lejas\Desktop\repo\451_C3\src\main\ghidra_scripts'
+    // -scriptPath 'C:\Users\lejas\Desktop\repo\451_C3\src\main\java\ghidra_scripts'
     // -postScript DecompileHeadless.java
     private void runGhidraScript(File file) {
         // Implement the logic to run Ghidra script or other processing here

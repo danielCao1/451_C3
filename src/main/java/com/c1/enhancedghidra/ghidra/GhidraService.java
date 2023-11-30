@@ -34,18 +34,21 @@ public class GhidraService {
 
         // TODO: run ghidra script
 
-//        tempFile.delete();
+        // tempFile.delete();
 
         // TODO: Return Ghidra Script Result
         return "Howdy";
     }
 
     // TODO: Rename this to function and also this scirpt
+    // .\analyzeHeadless 'C:\Users\lejas\Desktop' myProject
+    // -import 'C:\Users\lejas\Desktop\q1'
+    // -scriptPath 'C:\Users\lejas\Desktop\repo\451_C3\src\main\ghidra_scripts'
+    // -postScript DecompileHeadless.java
     private void runGhidraScript(File file) {
         // Implement the logic to run Ghidra script or other processing here
         // Example:
         // ProcessBuilder pb = new ProcessBuilder("/path/to/ghidra/script", file.getAbsolutePath());
         // Process p = pb.start();
-        // ... handle process output and errors ...
     }
 }

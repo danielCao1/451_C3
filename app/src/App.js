@@ -67,6 +67,7 @@ const UserProfiles = () => {
   const executeGhidraScript = async (userProfileId, scriptName) => {
     setSeconds(0);
     setIsTimerActive(true);
+    setGhidraOutput(null);
     const interval = setInterval(() => {
       setSeconds((seconds) => seconds + 1);
     }, 1000);
@@ -157,6 +158,23 @@ const UserProfiles = () => {
           >
             Begin All Function Output
           </button>
+
+          <button
+            style={{
+              maxWidth: "200px",
+              margin: "10px",
+            }}
+            class="styled-button"
+            onClick={() => {
+              setGhidraScript("FunctionReferences");
+              executeGhidraScript(
+                userProfiles[0]?.userProfileId,
+                "FunctionReferences"
+              );
+            }}
+          >
+            Get Function References/Flow
+          </button>
         </div>
       ) : null}
 
@@ -192,6 +210,28 @@ const UserProfiles = () => {
               );
             })}
           </ul>
+        </div>
+      )}
+
+      {ghidraOutput && ghidraScript === "FunctionReferences" && (
+        <div style={{ textAlign: "left" }}>
+          <strong>FunctionReferences Output:</strong>
+          {ghidraOutput.map((functionMap, index) => (
+            <div key={index}>
+              {Object.entries(functionMap).map(
+                ([functionName, calledFunctions]) => (
+                  <div key={functionName}>
+                    <strong>{functionName}:</strong>
+                    <ul>
+                      {calledFunctions.map((calledFunction, idx) => (
+                        <li key={idx}>{calledFunction}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )
+              )}
+            </div>
+          ))}
         </div>
       )}
     </div>

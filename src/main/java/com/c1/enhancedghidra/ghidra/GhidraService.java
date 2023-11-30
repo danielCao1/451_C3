@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -13,6 +14,7 @@ import java.util.*;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 
 @Service
 public class GhidraService {
@@ -46,9 +48,83 @@ public class GhidraService {
             return DetectVulnerabilitesScript(file);
         } else if (Objects.equals(scriptName, "DecompileHeadless")) {
             return DecompileHeadlessScript(file);
+        } else if (Objects.equals(scriptName, "FunctionReferences"))
+            return FunctionReferencesScript(file);
+        return null;
+    }
+
+    private List<Map<String, List<String>>> FunctionReferencesScript(File file) {
+        // Create Project Folder
+        Path tempDirPath = Paths.get(System.getProperty("java.io.tmpdir"));
+        String projectName = UUID.randomUUID().toString();
+        Path projectDir = null;
+        try {
+            projectDir = Files.createTempDirectory(tempDirPath, projectName);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
-        return null;
+        // Run Headless Analyzer
+        ProcessBuilder processBuilder = new ProcessBuilder(
+                "bash", "-c",
+                "\"/mnt/c/Users/lejas/Desktop/repo/451_C3/src/main/ghidra_10.4_PUBLIC/support/analyzeHeadless " +
+                        projectDir.toString().replace("\\", "/").replace("C:/", "/mnt/c/") + " " +
+                        projectName + " -import " +
+                        file.getAbsolutePath().replace("\\", "/").replace("C:/", "/mnt/c/") + " -scriptPath " +
+                        "/mnt/c/Users/lejas/Desktop/repo/451_C3/src/main/ghidra_scripts -postScript " +
+                        "FunctionReferences" + "\""
+        );
+        processBuilder.redirectErrorStream(true);
+
+        // Extract Output from Headless Analyzer Results
+        List<Map<String, List<String>>> outputList = new ArrayList<>();
+        Gson gson = new Gson();
+
+        try {
+            Process process = processBuilder.start();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                StringBuilder jsonBuilder = new StringBuilder();
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+                    System.out.println(line);
+                    if (line.startsWith("ReferenceOutput: ")) {
+                        line = line.replace("ReferenceOutput: ", ""); // Remove the keyword
+                        jsonBuilder.append(line);
+                    }
+                }
+                Type type = new TypeToken<Map<String, List<String>>>(){}.getType();
+                Map<String, List<String>> functionCallsRaw = gson.fromJson(jsonBuilder.toString(), type);
+
+                // Convert to a Map with unique lists
+                Map<String, Set<String>> functionCallsUnique = new HashMap<>();
+                for (Map.Entry<String, List<String>> entry : functionCallsRaw.entrySet()) {
+                    functionCallsUnique.put(entry.getKey(), new HashSet<>(entry.getValue()));
+                }
+                
+                Map<String, List<String>> functionCalls = new HashMap<>();
+                for (Map.Entry<String, Set<String>> entry : functionCallsUnique.entrySet()) {
+                    functionCalls.put(entry.getKey(), new ArrayList<>(entry.getValue()));
+                }
+
+                outputList.add(functionCalls);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        // Clean up Project Folder
+        try {
+            Files.walk(projectDir)
+                    .sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return outputList;
     }
 
     private List<Map<String, String>> DecompileHeadlessScript(File file) {

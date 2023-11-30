@@ -26,29 +26,28 @@ known_vulnerable = ["strcpy", "_strcpy", "strcpyA", "strcpyw", "wcscpy", "_wcscp
 "_execve", "_execvp", "_execvpe", "fork", "vfork", "clone", "pipe", "open", "open64"]
 
 def get_functions():
-    
     func_manager = currentProgram.getFunctionManager()
     all_functions = func_manager.getFunctionsNoStubs(True)
+    vulnerabilities = []
     for func in all_functions:
-        vuln_check(func)
-    return
+        vuln_info = vuln_check(func)
+        if vuln_info:
+            vulnerabilities.extend(vuln_info)
+    return vulnerabilities
 
-def vuln_check(func) :
+def vuln_check(func):
     if func.getName() in known_vulnerable:
         callers = get_callers(func)
         if not callers:
-            return
+            return None
         else:
-            for caller in callers:
-                print_message(caller, func.getName())
-    return
+            return [{"caller": str(caller), "vulnerable_function": func.getName()} for caller in callers]
 
 def get_callers(func):
     callers = func.getCallingFunctions(None)
     return callers
 
-def print_message(caller, func_name):
-    print("[!] Vulnerable function " + func_name + " is called by: " + str(caller))
-    return
+vulnerabilities = get_functions()
+for vuln in vulnerabilities:
+    print(vuln)
 
-get_functions()

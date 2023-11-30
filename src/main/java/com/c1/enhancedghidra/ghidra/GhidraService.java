@@ -5,12 +5,11 @@ import com.c1.enhancedghidra.profile.UserProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 
 @Service
 public class GhidraService {
@@ -25,7 +24,6 @@ public class GhidraService {
 
         // send file to server temp file system i.e. (C:\Users\lejas\AppData\Local\Temp\)
         File tempFile = new File(System.getProperty("java.io.tmpdir"), downloadResponse.getFileName());
-        System.out.println("Temporary directory: " + System.getProperty("java.io.tmpdir"));
 
         try (FileOutputStream fos = new FileOutputStream(tempFile)) {
             fos.write(downloadResponse.getFileData());
@@ -46,13 +44,58 @@ public class GhidraService {
     // TODO: Rename this to function and also this script
     // .\analyzeHeadless 'C:\Users\lejas\Desktop' myProject -import 'C:\Users\lejas\Desktop\repo\451_C3\src\main\ghidra_scripts\sampleBinary\b.out' -scriptPath 'C:\Users\lejas\Desktop\repo\451_C3\src\main\ghidra_scripts' -postScript DetectVulnerabilites.py
     private Object runGhidraScript(File file, String scriptName) {
-        System.out.println(scriptName + "test");
+        Path tempDirPath = Paths.get(System.getProperty("java.io.tmpdir"));
+        String projectName = UUID.randomUUID().toString();
+        Path projectDir = null;
+        try {
+            projectDir = Files.createTempDirectory(tempDirPath, projectName);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-        List<String> outputList = new ArrayList<>();
-        outputList.add("test");
-        outputList.add("output");
+        ProcessBuilder processBuilder = new ProcessBuilder(
+                "bash", "-c",
+                "\"/mnt/c/Users/lejas/Desktop/repo/451_C3/src/main/ghidra_10.4_PUBLIC/support/analyzeHeadless " +
+                        projectDir.toString().replace("\\", "/").replace("C:/", "/mnt/c/") + " " +
+                        projectName + " -import " +
+                        file.getAbsolutePath().replace("\\", "/").replace("C:/", "/mnt/c/") + " -scriptPath " +
+                        "/mnt/c/Users/lejas/Desktop/repo/451_C3/src/main/ghidra_scripts -postScript " +
+                        "DetectVulnerabilites.py" + "\""
+        );
+
+
+
+
+        processBuilder.redirectErrorStream(true);
+
+        List<Map<String, String>> outputList = new ArrayList<>();
+        try {
+            Process process = processBuilder.start();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    System.out.println(line);
+                    // Parse each line (assuming JSON output)
+                    // Map<String, String> parsedLine = parseLine(line); // Implement parseLine to convert the line to a Map
+                    // outputList.add(parsedLine);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Files.walk(projectDir)
+                    .sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
 
         return outputList;
     }
+
 
 }

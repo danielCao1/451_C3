@@ -1,3 +1,5 @@
+# 1. Create a list of known vulnerable functions (e.g. known_vulnerable[])
+# TODO copy list of known_vulnerable functions
 known_vulnerable = ["strcpy", "_strcpy", "strcpyA", "strcpyw", "wcscpy", "_wcscpy", "_tcscpy", "mbscpy",
 "_mbscpy", "StrCpy", "StrCpyA", "StrCpyW", "lstrcpy", "lstrcpyA", "lstrcpyW", "_tccpy", "_mbccpy", "_ftcscpy",
 "stpcpy", "wcpcpy", "strcat", "_strcat", "strcatA", "strcatW", "wcscat", "_wcscat", "_tcscat", "mbscat",
@@ -24,30 +26,44 @@ known_vulnerable = ["strcpy", "_strcpy", "strcpyA", "strcpyw", "wcscpy", "_wcscp
 "setreuid", "setresuid", "setgid", "setegid", "setregid", "setresgid", "setgroups", "initgroups", "execl",
 "execlp", "execle", "execv", "execve", "execvp", "execvpe", "_execl", "_execlp", "_execle", "_execv",
 "_execve", "_execvp", "_execvpe", "fork", "vfork", "clone", "pipe", "open", "open64"]
-
+# 2. Get a list of all functions in the binary (e.g. all_functions[])
 def get_functions():
-    func_manager = currentProgram.getFunctionManager()
-    all_functions = func_manager.getFunctionsNoStubs(True)
-    vulnerabilities = []
+    # TODO get the function manager
+    # TODO get the function iterator
+    func_manager = currentProgram.getFunctionManager() # get function manager
+    all_functions = func_manager.getFunctionsNoStubs(True) # "True" means iterate forward
+    # use correct method function .??
     for func in all_functions:
-        vuln_info = vuln_check(func)
-        if vuln_info:
-            vulnerabilities.extend(vuln_info)
-    return vulnerabilities
-
-def vuln_check(func):
+        vuln_check(func)
+    return
+# 3. See if any function from Step 2 is found in the list created during Step 1 known_vulnerable[]. If so,
+def vuln_check(func) :
     if func.getName() in known_vulnerable:
         callers = get_callers(func)
         if not callers:
-            return None
+            return
         else:
-            return [{"caller": str(caller), "vulnerable_function": func.getName()} for caller in callers]
-
+            for caller in callers:
+                print_message(caller, func.getName())
+    return
+## 3.b Identify any function that calls the known_vulnerable function
 def get_callers(func):
+    # TODO use correct method (function. ?? ) to provide a list of functions that call this function
     callers = func.getCallingFunctions(None)
     return callers
+def print_message(caller, func_name):
+    if(func_name == "memcpy" or func_name == "strcpy" or func_name == "strncpy" or func_name == "memset" or func_name == "realloc"):
+        print("[!] Vulnerable function " + func_name + " is called by: " + str(caller) + "# Can be used for buffer overflow or arbitrary memory write")
+    elif(func_name == "fgets" or func_name == "fread" or func_name == "fwrite"):
+        print("[!] Vulnerable function " + func_name + " is called by: " + str(caller) + "# Can be used for buffer overflow")
+    elif(func_name == "read"):
+        print("[!] Vulnerable function " + func_name + " is called by: " + str(caller) + "# Can be used for file descriptor hijacking or denial-of-service")
+    elif(func_name == "sprintf"):
+        print("[!] Vulnerable function " + func_name + " is called by: " + str(caller) + "# Can be used for format string vulnerabilities")
+    else:
+        print("[!] Vulnerable function " + func_name + " is called by: " + str(caller))
+    
+    
+    return
 
-vulnerabilities = get_functions()
-for vuln in vulnerabilities:
-    print(vuln)
-
+get_functions()

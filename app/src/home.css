@@ -1,0 +1,139 @@
+body {
+    overflow: hidden;
+}
+.home-container {
+    background: #333333;
+    height: 100vh;
+    overflow: hidden;
+    color:white;
+}
+.base-home-container {
+    display: flex;
+    flex-direction: row;
+    /* justify-content: center; */
+    /* align-items: center; */
+    height: 90vh;
+    overflow: hidden;
+    max-width: 1400px;
+    margin: auto;
+}
+
+.upload-container,
+.image-container,
+.about-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1; 
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding-bottom: 100px;
+}
+
+.home-container h1 {
+    font-size: 50px;
+    padding-bottom: 40px;
+}
+
+
+.image-circle {
+    background-color: #F1B82D;
+    border-radius: 50%; 
+    padding: 30px;
+}
+
+.image-container img {
+    max-width: 350px; 
+    max-height: 350px; 
+    border-radius: 50%;
+    opacity: 0.85;
+}
+
+.loader {
+    margin: auto;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    width: 15px;
+    height: 15px;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  } 
+
+
+  .toolbox {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 100;
+    height: 300px;
+    background-color: rgb(0, 0, 0, 0.5);
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    
+  }
+  
+  .modal {
+    display: none;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #303030;
+    padding: 40px;
+    border: 1px solid #ddd;
+    z-index: 101;
+    border-radius: 15px;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 20px;
+  }
+  
+  .modal.active {
+    display: block;
+  }
+  
+  .overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 100;
+  }
+  
+  .overlay.active {
+    display: block;
+  }
+  
+  .toolbox-items {
+    background: none;
+    cursor: pointer;
+    border: 1px solid #ddd;
+    color: white;
+    padding: 10px;
+  }
+  
+  .toolbox-header{
+    font-size: 20px; 
+    display: flex;
+    margin: auto;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 0px;
+    font-weight: 800;
+  }
